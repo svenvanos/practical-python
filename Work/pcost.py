@@ -1,7 +1,6 @@
 # pcost.py
 #
 # Exercise 1.27
-import sys
 from report import read_portfolio
 
 def portfolio_cost(filename):
@@ -13,12 +12,14 @@ def portfolio_cost(filename):
         
     return total_price
 
+def main(args):
+    
+    if len(args) != 2:
+        raise SystemExit(f'Usage: {args[0]} ' 'portfile pricefile')
+    cost = portfolio_cost(args[1])
 
-if len(sys.argv) == 2:
-    filename = sys.argv[1]
-else:
-    filename = "Data/portfolio.csv"
-
-cost = portfolio_cost(filename)
-
-print(f"Total price to buy all stocks is ${cost:.2f}")
+    print(f"Total price to buy all stocks is ${cost:.2f}")
+    
+if __name__ == "__main__":
+    import sys
+    main(sys.argv)
