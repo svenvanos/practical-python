@@ -4,7 +4,6 @@ import csv
 import report
 import tableformat
 from follow import follow
-import time
 
 def select_columns(rows, indices):
     for row in rows:
