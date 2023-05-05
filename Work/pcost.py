@@ -1,25 +1,20 @@
 # pcost.py
-#
-# Exercise 1.27
-from report import read_portfolio
+
+import report
 
 def portfolio_cost(filename):
     '''
     Computes the total cost (shares*price) of a portfolio file
     '''
-    portfolio = read_portfolio(filename)
-    total_price = sum([s["shares"] * s["price"] for s in portfolio])
-        
-    return total_price
+    portfolio = report.read_portfolio(filename)
+    return sum([s.shares * s.price for s in portfolio])
 
 def main(args):
-    
     if len(args) != 2:
-        raise SystemExit(f'Usage: {args[0]} ' 'portfile pricefile')
-    cost = portfolio_cost(args[1])
+        raise SystemExit('Usage: %s portfoliofile' % args[0])
+    filename = args[1]
+    print('Total cost:', portfolio_cost(filename))
 
-    print(f"Total price to buy all stocks is ${cost:.2f}")
-    
-if __name__ == "__main__":
+if __name__ == '__main__':
     import sys
     main(sys.argv)

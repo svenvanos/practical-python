@@ -1,8 +1,8 @@
 # report.py
-#
-# Exercise 2.4
 
 import fileparse
+import stock
+import tableformat
 
 def read_portfolio(filename):
     '''
@@ -10,57 +10,59 @@ def read_portfolio(filename):
     name, shares, and price.
     '''
     with open(filename) as lines:
-        return fileparse.parse_csv(lines, select=["name", "shares", "price"], types=[str, int, float])
-
+        portdicts = fileparse.parse_csv(lines, select=['name','shares','price'], types=[str,int,float])
+        portfolio = [stock.Stock(d["name"], d["shares"], d["price"]) for d in portdicts]
+        return portfolio
 
 def read_prices(filename):
     '''
     Read a CSV file of price data into a dict mapping names to prices.
     '''
     with open(filename) as lines:
-        return dict(fileparse.parse_csv(lines,types=[str,float], has_headers=False))
+        return dict(fileparse.parse_csv(lines, types=[str,float], has_headers=False))
 
-
-def make_report(portfolio, prices):
+def make_report_data(portfolio,prices):
     '''
     Make a list of (name, shares, price, change) tuples given a portfolio list
     and prices dictionary.
     '''
-    report_list = []
-    for s in portfolio:
-        pre = s["price"]
-        current = prices[s["name"]]
-        change = current - pre
-        report_list.append((s["name"], s["shares"], prices[s["name"]], change))
-    return report_list
+    rows = []
+    for stock in portfolio:
+        current_price = prices[stock.name]
+        change = current_price - stock.price
+        summary = (stock.name, stock.shares, current_price, change)
+        rows.append(summary)
+    return rows
 
-
-def print_report (report):
+def print_report(reportdata, formatter):
     '''
     Print a nicely formated table from a list of (name, shares, price, change) tuples.
     '''
-    print("%10s %10s %10s %10s" % ("Name", "Shares", "Price", "change"))
-    print("%10s %10s %10s %10s" % ("----------", "----------", "----------", "----------"))
-    for name, shares, price, change in report:
-        print(f'{name:>10s} {shares:>10d} {"$"+str(round(price, 2)):>10s} {change:>10.2f}')
+    formatter.headings(['Name','Shares','Price','Change'])
+    for name, shares, price, change in reportdata:
+        rowdata = [name, str(shares), f"{price:0.2f}", f"{change:0.2f}"]
+        formatter.row(rowdata)
 
-
-def portfolio_report(portfolio_filename, prices_filename):
+def portfolio_report(portfoliofile, pricefile, fmt="txt"):        
     '''
     Make a stock report given portfolio and price data files.
     '''
-    portfolio = read_portfolio(portfolio_filename)
-    prices = read_prices(prices_filename)
-    report = make_report(portfolio, prices)
-    print_report(report)
+    # Read data files 
+    portfolio = read_portfolio(portfoliofile)
+    prices = read_prices(pricefile)
 
+    # Create the report data
+    report = make_report_data(portfolio, prices)
+
+    # Print it out
+    formatter = tableformat.create_formatter(fmt)
+    print_report(report, formatter)
 
 def main(args):
-    
     if len(args) != 3:
-        raise SystemExit(f'Usage: {args[0]} ' 'portfile pricefile')
+        raise SystemExit('Usage: %s portfile pricefile' % args[0])
     portfolio_report(args[1], args[2])
-    
-if __name__ == "__main__":
+
+if __name__ == '__main__':
     import sys
     main(sys.argv)
